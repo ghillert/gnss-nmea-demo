@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
@@ -32,14 +34,15 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import com.hillert.gnss.demo.config.SpringIntegrationConfig.NmeaMessageGateway;
-import com.hillert.gnss.demo.model.LocalDeviceInformation;
-
+import com.hillert.gnss.demo.model.RemoteDeviceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
+* See {@link BluetoothService}.
 *
 * @author Gunnar Hillert
 *
@@ -52,9 +55,7 @@ public class DefaultBluetoothService implements BluetoothService {
 	@Autowired
 	private NmeaMessageGateway nmeaMessageGateway;
 
-	private List<RemoteDevice> discoveredBluetoothDevices = new ArrayList<>();
-
-	private List<String> discoveredBluetoothServices = new ArrayList<>();
+	private SortedSet<RemoteDeviceService> discoveredRemoteDeviceServices = new ConcurrentSkipListSet<>();
 
 	/**
 	 * Starts the Bluetooth devices discovery. Close-by devices are printed in
@@ -64,44 +65,47 @@ public class DefaultBluetoothService implements BluetoothService {
 	@Override
 	public void discoverBluetoothDevices() {
 
-		final DiscoveryAgent agent;
-		try {
-			agent = LocalDevice.getLocalDevice().getDiscoveryAgent();
-		}
-		catch (BluetoothStateException e) {
-			throw new IllegalStateException(e);
-		}
-		//agent.retrieveDevices()
-		LOGGER.info("Starting device discovery...");
-		final BluetoothDiscoveryListener listener = new BluetoothDiscoveryListener(
-				this.discoveredBluetoothDevices,
-				this.discoveredBluetoothServices);
+		final LocalDevice localDevice = this.getLocalDeviceInformation();
+
+		final DiscoveryAgent agent = localDevice.getDiscoveryAgent();
+
+		LOGGER.info("Starting device discovery using local device {} ({}) …", localDevice.getFriendlyName(), localDevice.getBluetoothAddress());
+
+		final BluetoothDiscoveryListener listener = new BluetoothDiscoveryListener();
+
 		try {
 			agent.startInquiry(DiscoveryAgent.GIAC, listener);
 		}
 		catch (BluetoothStateException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Discovery cannot be started due to "
+					+ "other operations that are being performed by the device", e);
 		}
 
 		try {
 			listener.getCountDownLatch().await();
 		}
 		catch (InterruptedException e) {
-			e.printStackTrace();
+			Thread.currentThread().interrupt();
+			LOGGER.warn("The discovery of Bluetooth devices got interrupted.");
 		}
 
-		for (RemoteDevice device : this.discoveredBluetoothDevices) {
+		final UUID[] bluetoothServiceClassuUuids = new UUID[1];
+		bluetoothServiceClassuUuids[0] = new UUID(BluetoothServiceClass.SERIAL_PORT.getId());
+
+		for (RemoteDevice device : listener.getDiscoveredBluetoothDevices()) {
+
 			final String deviceName;
 			try {
 				deviceName = device.getFriendlyName(false);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new IllegalStateException("Remote device can not be contacted or the remote " +
 						"device could not provide its name.", e);
 			}
 			try {
-				UUID[] uuid = new UUID[1];
-				uuid[0] = new UUID(BluetoothServiceClass.SERIAL_PORT.getId());
-				agent.searchServices(null, uuid, device, listener);
+				LOGGER.info("Trying to discover the following service(s): '{}' for device '{}'.", bluetoothServiceClassuUuids, deviceName);
+				listener.resetCountDownLatch();
+				agent.searchServices(null, bluetoothServiceClassuUuids, device, listener);
 			}
 			catch (BluetoothStateException e) {
 				throw new IllegalStateException("The Bluetooth services search failed.", e);
@@ -111,10 +115,15 @@ public class DefaultBluetoothService implements BluetoothService {
 				listener.getCountDownLatch().await();
 			}
 			catch (InterruptedException e) {
-				LOGGER.warn("The discovery of Bluetooth devices got interrupted.");
+				Thread.currentThread().interrupt();
+				LOGGER.warn("The discovery of Bluetooth services got interrupted.");
 			}
 
 			LOGGER.info("The search for Bluetooth services for device {} finished.", deviceName);
+		}
+
+		for (RemoteDeviceService remoteDeviceService : listener.getRemoteDeviceServices()) {
+			this.discoveredRemoteDeviceServices.add(remoteDeviceService);
 		}
 
 		LOGGER.info("Finished device discovery.");
@@ -148,11 +157,13 @@ public class DefaultBluetoothService implements BluetoothService {
 
 		while (true) {
 			try {
-				String lineRead = bufferedReader.readLine();
-				this.nmeaMessageGateway.send(lineRead);
+				final String lineRead = bufferedReader.readLine();
+				if (StringUtils.hasText(lineRead) && lineRead.startsWith("$")) {
+					this.nmeaMessageGateway.send(lineRead);
+				}
 			}
-			catch (Exception e) {
-				e.printStackTrace();
+			catch (IOException e) {
+				throw new IllegalStateException(e);
 			}
 		}
 
@@ -164,26 +175,20 @@ public class DefaultBluetoothService implements BluetoothService {
 	}
 
 	@Override
-	public LocalDeviceInformation getLocalDeviceInformation() {
-		final LocalDevice local;
+	public LocalDevice getLocalDeviceInformation() {
+		final LocalDevice localDevice;
 		try {
-			local = LocalDevice.getLocalDevice();
+			localDevice = LocalDevice.getLocalDevice();
 		}
 		catch (BluetoothStateException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("The Bluetooth system could not be initialized.", e);
 		}
 
-		return new LocalDeviceInformation(local.getFriendlyName(), local.getBluetoothAddress());
-
+		return localDevice;
 	}
 
 	@Override
-	public List<RemoteDevice> getDiscoveredBluetoothDevices() {
-		return this.discoveredBluetoothDevices;
-	}
-
-	@Override
-	public List<String> getDiscoveredBluetoothServices() {
-		return this.discoveredBluetoothServices;
+	public List<RemoteDeviceService> getDiscoveredBluetoothDeviceServices() {
+		return new ArrayList<RemoteDeviceService>(this.discoveredRemoteDeviceServices);
 	}
 }

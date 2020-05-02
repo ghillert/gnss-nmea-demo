@@ -20,6 +20,7 @@ import net.sf.marineapi.nmea.util.GpsFixQuality;
 import net.sf.marineapi.nmea.util.GpsFixStatus;
 
 /**
+* Basic status information of the GNSS (GPS, Galileo etc.) data.
 *
 * @author Gunnar Hillert
 *
@@ -27,6 +28,9 @@ import net.sf.marineapi.nmea.util.GpsFixStatus;
 public class GnssStatus {
 
 	private double altitude;
+	private double longitude;
+	private double latitude;
+
 	private GpsFixQuality fixQuality;
 	private int satelliteCount;
 	private GpsFixStatus gpsFixStatus;
@@ -55,6 +59,18 @@ public class GnssStatus {
 	public void setGpsFixStatus(GpsFixStatus gpsFixStatus) {
 		this.gpsFixStatus = gpsFixStatus;
 	}
+	public double getLongitude() {
+		return this.longitude;
+	}
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+	public double getLatitude() {
+		return this.latitude;
+	}
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
 
 	@Override
 	public int hashCode() {
@@ -65,6 +81,10 @@ public class GnssStatus {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + ((this.fixQuality == null) ? 0 : this.fixQuality.hashCode());
 		result = prime * result + ((this.gpsFixStatus == null) ? 0 : this.gpsFixStatus.hashCode());
+		temp = Double.doubleToLongBits(this.latitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(this.longitude);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + this.satelliteCount;
 		return result;
 	}
@@ -90,17 +110,26 @@ public class GnssStatus {
 		if (this.gpsFixStatus != other.gpsFixStatus) {
 			return false;
 		}
+		if (Double.doubleToLongBits(this.latitude) != Double.doubleToLongBits(other.latitude)) {
+			return false;
+		}
+		if (Double.doubleToLongBits(this.longitude) != Double.doubleToLongBits(other.longitude)) {
+			return false;
+		}
 		if (this.satelliteCount != other.satelliteCount) {
 			return false;
 		}
 		return true;
 	}
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("GnssStatus [altitude=");
 		builder.append(this.altitude);
+		builder.append(", longitude=");
+		builder.append(this.longitude);
+		builder.append(", latitude=");
+		builder.append(this.latitude);
 		builder.append(", fixQuality=");
 		builder.append(this.fixQuality);
 		builder.append(", satelliteCount=");
@@ -110,5 +139,7 @@ public class GnssStatus {
 		builder.append("]");
 		return builder.toString();
 	}
+
+
 
 }

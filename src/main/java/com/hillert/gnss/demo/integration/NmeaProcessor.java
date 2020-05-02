@@ -26,10 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-*
-* @author Gunnar Hillert
-*
-*/
+ * Processes all Nmea messages.
+ *
+ * @author Gunnar Hillert
+ *
+ */
 public class NmeaProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NmeaProcessor.class);
@@ -51,6 +52,8 @@ public class NmeaProcessor {
 		switch (SentenceId.valueOf(sentenceId)) {
 			case GGA:
 				final GGASentence ggaSentence = (GGASentence) gsa;
+				this.gnssStatus.setLatitude(ggaSentence.getPosition().getLatitude());
+				this.gnssStatus.setLongitude(ggaSentence.getPosition().getLongitude());
 				this.gnssStatus.setAltitude(ggaSentence.getAltitude());
 				this.gnssStatus.setFixQuality(ggaSentence.getFixQuality());
 				this.gnssStatus.setSatelliteCount(ggaSentence.getSatelliteCount());
@@ -63,7 +66,7 @@ public class NmeaProcessor {
 		}
 
 		if (this.gnssStatusHashcode != this.gnssStatus.hashCode()) {
-			System.out.println(this.gnssStatus);
+			LOGGER.info(this.gnssStatus.toString());
 			this.gnssStatusHashcode = this.gnssStatus.hashCode();
 		}
 

@@ -20,12 +20,15 @@ package com.hillert.gnss.demo.services;
  * Defines Bluetooth Service Classes supported by the application.
  *
  * @author Gunnar Hillert
- *
- * @see https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
+ * @see <a href="https://www.bluetooth.com/specifications/assigned-numbers/service-discovery">
+ *   https://www.bluetooth.com/specifications/assigned-numbers/service-discovery</a>
  *
  */
 public enum BluetoothServiceClass {
 
+	/**
+	 * Represents the Serial Port Profile (SPP).
+	 */
 	SERIAL_PORT(0x1101, "Serial Port");
 
 	private long id;
@@ -37,11 +40,11 @@ public enum BluetoothServiceClass {
 	}
 
 	public long getId() {
-		return id;
+		return this.id;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 }

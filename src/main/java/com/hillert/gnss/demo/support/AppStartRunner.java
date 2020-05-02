@@ -19,8 +19,8 @@ package com.hillert.gnss.demo.support;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.bluetooth.RemoteDevice;
-
+import com.hillert.gnss.demo.model.RemoteDeviceService;
+import com.hillert.gnss.demo.services.BluetoothService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +30,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.hillert.gnss.demo.services.BluetoothService;
-
 /**
+* {@link ApplicationRunner} that checks whether a Bluetooth Url is specified as
+* part of the {@link DemoSettings}. If not specified, will perform Bluetooth discovery.
 *
 * @author Gunnar Hillert
 *
@@ -40,6 +40,8 @@ import com.hillert.gnss.demo.services.BluetoothService;
 @Component
 @Profile("!test")
 public class AppStartRunner implements ApplicationRunner {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AppStartRunner.class);
 
 	@Autowired
 	private BluetoothService bluetoothService;
@@ -50,14 +52,9 @@ public class AppStartRunner implements ApplicationRunner {
 	private static final Logger LOG =
 	LoggerFactory.getLogger(AppStartRunner.class);
 
-	private static int counter;
-
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		LOG.info("Application started with option names : {}",
-		args.getOptionNames());
-		LOG.info("Increment counter");
-		counter++;
+		LOG.info("Application started with option names : {}", args.getOptionNames());
 
 		final String bluetoothAddressToUse;
 
@@ -68,23 +65,25 @@ public class AppStartRunner implements ApplicationRunner {
 		else {
 			LOG.info("Bluetooth device not pre-configurred. Starting discovery…");
 			this.bluetoothService.discoverBluetoothDevices();
-			List<RemoteDevice> discoveredBluetoothDevices = this.bluetoothService.getDiscoveredBluetoothDevices();
-			List<String> discoveredBluetoothServices = this.bluetoothService.getDiscoveredBluetoothServices();
+			List<RemoteDeviceService> discoveredRemoteDeviceService = this.bluetoothService.getDiscoveredBluetoothDeviceServices();
 
-			for (RemoteDevice rd : discoveredBluetoothDevices) {
-				System.out.println(rd.getFriendlyName(false) + " : " + rd.getBluetoothAddress());
+			if (discoveredRemoteDeviceService.isEmpty()) {
+				LOGGER.warn("No Bluetooth devices/services found. Exiting …");
+				System.exit(1);
 			}
 
-			for (String serviceUrl : discoveredBluetoothServices) {
-				System.out.println(serviceUrl);
+			for (RemoteDeviceService remoteDeviceService : discoveredRemoteDeviceService) {
+				System.out.println(
+					remoteDeviceService.getRemoteDevice().getFriendlyName(false) +
+					" - connection url: " + remoteDeviceService.getConnectionUrl());
 			}
 
 			System.out.println("Which Service do you like to use?");
 
-			try(Scanner in = new Scanner(System.in)) {
+			try (Scanner in = new Scanner(System.in)) {
 				int selectedOption = in.nextInt();
 				System.out.println("You entered: " + selectedOption);
-				bluetoothAddressToUse = discoveredBluetoothServices.get(selectedOption);
+				bluetoothAddressToUse = discoveredRemoteDeviceService.get(selectedOption).getConnectionUrl();
 			}
 
 		}

@@ -25,6 +25,7 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 
 /**
+ * Spring Integration specific configuration.
  *
  * @author Gunnar Hillert
  *
