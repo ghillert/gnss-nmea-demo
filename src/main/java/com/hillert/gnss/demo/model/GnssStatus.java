@@ -16,6 +16,9 @@
 
 package com.hillert.gnss.demo.model;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import net.sf.marineapi.nmea.util.GpsFixQuality;
 import net.sf.marineapi.nmea.util.GpsFixStatus;
 
@@ -32,7 +35,7 @@ public class GnssStatus {
 	private double latitude;
 
 	private GpsFixQuality fixQuality;
-	private int satelliteCount;
+	private Map<GnssProvider, Integer> satelliteCount = new ConcurrentHashMap<>();
 	private GpsFixStatus gpsFixStatus;
 
 	public double getAltitude() {
@@ -47,10 +50,10 @@ public class GnssStatus {
 	public void setFixQuality(GpsFixQuality fixQuality) {
 		this.fixQuality = fixQuality;
 	}
-	public int getSatelliteCount() {
+	public Map<GnssProvider, Integer> getSatelliteCount() {
 		return this.satelliteCount;
 	}
-	public void setSatelliteCount(int satelliteCount) {
+	public void setSatelliteCount(Map<GnssProvider, Integer> satelliteCount) {
 		this.satelliteCount = satelliteCount;
 	}
 	public GpsFixStatus getGpsFixStatus() {
@@ -85,7 +88,7 @@ public class GnssStatus {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(this.longitude);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + this.satelliteCount;
+		result = prime * result + getTotalSatelliteCount();
 		return result;
 	}
 
@@ -116,7 +119,7 @@ public class GnssStatus {
 		if (Double.doubleToLongBits(this.longitude) != Double.doubleToLongBits(other.longitude)) {
 			return false;
 		}
-		if (this.satelliteCount != other.satelliteCount) {
+		if (getTotalSatelliteCount() != other.getTotalSatelliteCount()) {
 			return false;
 		}
 		return true;
@@ -132,14 +135,21 @@ public class GnssStatus {
 		builder.append(this.latitude);
 		builder.append(", fixQuality=");
 		builder.append(this.fixQuality);
-		builder.append(", satelliteCount=");
-		builder.append(this.satelliteCount);
+		builder.append(", totalSatelliteCount=");
+		builder.append(getTotalSatelliteCount());
 		builder.append(", gpsFixStatus=");
 		builder.append(this.gpsFixStatus);
 		builder.append("]");
 		return builder.toString();
 	}
 
-
-
+	public int getTotalSatelliteCount() {
+		int totalSatelliteCount = 0;
+		for (Map.Entry<GnssProvider, Integer> satelliteCountEntry : this.satelliteCount.entrySet()) {
+			if (satelliteCountEntry.getValue() != null) {
+				totalSatelliteCount = totalSatelliteCount + satelliteCountEntry.getValue().intValue();
+			}
+		}
+		return totalSatelliteCount;
+	}
 }

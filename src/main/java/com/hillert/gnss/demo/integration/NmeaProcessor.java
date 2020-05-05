@@ -16,12 +16,19 @@
 
 package com.hillert.gnss.demo.integration;
 
+import com.hillert.gnss.demo.model.GnssProvider;
 import com.hillert.gnss.demo.model.GnssStatus;
+
+import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
 import net.sf.marineapi.nmea.sentence.GSASentence;
+import net.sf.marineapi.nmea.sentence.GSVSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
+import net.sf.marineapi.nmea.util.GpsFixQuality;
+import net.sf.marineapi.nmea.util.Position;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,23 +51,45 @@ public class NmeaProcessor {
 	}
 
 	public void process(String message) {
-
+		//LOGGER.info(message);
 		final SentenceFactory sf = SentenceFactory.getInstance();
-		final Sentence gsa = (Sentence) sf.createParser(message);
+		final Sentence sentence = (Sentence) sf.createParser(message);
 
-		final String sentenceId = gsa.getSentenceId();
+		final String sentenceId = sentence.getSentenceId();
 		switch (SentenceId.valueOf(sentenceId)) {
 			case GGA:
-				final GGASentence ggaSentence = (GGASentence) gsa;
-				this.gnssStatus.setLatitude(ggaSentence.getPosition().getLatitude());
-				this.gnssStatus.setLongitude(ggaSentence.getPosition().getLongitude());
-				this.gnssStatus.setAltitude(ggaSentence.getAltitude());
-				this.gnssStatus.setFixQuality(ggaSentence.getFixQuality());
-				this.gnssStatus.setSatelliteCount(ggaSentence.getSatelliteCount());
+				final GGASentence ggaSentence = (GGASentence) sentence;
+				final Double latitude;
+				final Double longitude;
+				final Double altitude;
+				final GpsFixQuality fixQuality;
+				try {
+					final Position position = ggaSentence.getPosition();
+					latitude = position.getLatitude();
+					longitude = position.getLongitude();
+					altitude = ggaSentence.getAltitude();
+					fixQuality = ggaSentence.getFixQuality();
+				}
+				catch (DataNotAvailableException e) {
+					e.printStackTrace();
+					latitude = null;
+					longitude = null;
+				}
+				
+				this.gnssStatus.setLatitude(position.getLatitude());
+				this.gnssStatus.setLongitude(position.getLongitude());
+				this.gnssStatus.setAltitude(altitude);
+				this.gnssStatus.setFixQuality(fixQuality);
 				break;
 			case GSA:
-				final GSASentence gsaSentence = (GSASentence) gsa;
+				final GSASentence gsaSentence = (GSASentence) sentence;
 				this.gnssStatus.setGpsFixStatus(gsaSentence.getFixStatus());
+				break;
+			case GSV:
+				final GSVSentence gsvSentence = (GSVSentence) sentence;
+				GnssProvider gnssProvider = GnssProvider.fromKey(gsvSentence.getTalkerId().name());
+				//LOGGER.info("TALKER ID " + gnssProvider.getName());
+				this.gnssStatus.getSatelliteCount().put(gnssProvider, gsvSentence.getSatelliteCount());
 				break;
 			default:
 		}
