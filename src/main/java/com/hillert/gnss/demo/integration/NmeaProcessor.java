@@ -97,13 +97,15 @@ public class NmeaProcessor {
 				final GGASentence ggaSentence = (GGASentence) sentence;
 				final Position position = handleNmeaData(ggaSentence::getPosition);
 
-				final Double latitude = position.getLatitude();
-				final Double longitude = position.getLongitude();
+				if (position != null) {
+					final Double latitude = position.getLatitude();
+					final Double longitude = position.getLongitude();
+					this.gnssStatus.setLatitude(latitude);
+					this.gnssStatus.setLongitude(longitude);
+				}
+
 				final Double altitude = handleNmeaData(ggaSentence::getAltitude);
 				final GpsFixQuality fixQuality = handleNmeaData(ggaSentence::getFixQuality);
-
-				this.gnssStatus.setLatitude(latitude);
-				this.gnssStatus.setLongitude(longitude);
 				this.gnssStatus.setAltitude(altitude);
 				this.gnssStatus.setFixQuality(fixQuality);
 				break;
