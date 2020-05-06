@@ -16,9 +16,10 @@
 
 package com.hillert.gnss.demo.integration;
 
+import java.util.function.Supplier;
+
 import com.hillert.gnss.demo.model.GnssProvider;
 import com.hillert.gnss.demo.model.GnssStatus;
-
 import net.sf.marineapi.nmea.parser.DataNotAvailableException;
 import net.sf.marineapi.nmea.parser.SentenceFactory;
 import net.sf.marineapi.nmea.sentence.GGASentence;
@@ -28,7 +29,6 @@ import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.util.GpsFixQuality;
 import net.sf.marineapi.nmea.util.Position;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +50,44 @@ public class NmeaProcessor {
 		this.gnssStatusHashcode = this.gnssStatus.hashCode();
 	}
 
+	/**
+	 * When retrieving data from NMEA messages, the underlying library may throw
+	 * a {@link DataNotAvailableException}. This helper method will catch the exception
+	 * and return null, indicating that the data is not available, yet.
+	 *
+	 * @param <T> The data to return
+	 * @param s The function to be executed
+	 * @return The requested NMEA data or null
+	 */
+	public <T> T handleNmeaData(Supplier<T> s) {
+		T returnValue;
+		try {
+			returnValue = s.get();
+		}
+		catch (DataNotAvailableException e) {
+			e.printStackTrace();
+			returnValue = null;
+		}
+		return returnValue;
+	}
+
+	/**
+	 * Currently handles the following NMEA messages:
+	 *
+	 * <ul>
+	 *   <li>GGA (Global positioning system fix data) - For position data
+	 *   <li>GSA (GNSS DOP and Active Satellites) - GpsFixStatus
+	 *   <li>GSV (GNSS Satellites in View) - Number of Satellites in view
+	 *</ul>
+	 *
+	 * Note: The GGL message (Latitude and longitude, with time of position fix and status)
+	 * would be technically more appropriate compared to the GGA message, but the
+	 * GGA message also provides altitude information.
+	 *
+	 * @param message The NMEA to process, only GGA, GSA, GSV - other messages will be ignored
+	 */
 	public void process(String message) {
-		//LOGGER.info(message);
+
 		final SentenceFactory sf = SentenceFactory.getInstance();
 		final Sentence sentence = (Sentence) sf.createParser(message);
 
@@ -59,36 +95,25 @@ public class NmeaProcessor {
 		switch (SentenceId.valueOf(sentenceId)) {
 			case GGA:
 				final GGASentence ggaSentence = (GGASentence) sentence;
-				final Double latitude;
-				final Double longitude;
-				final Double altitude;
-				final GpsFixQuality fixQuality;
-				try {
-					final Position position = ggaSentence.getPosition();
-					latitude = position.getLatitude();
-					longitude = position.getLongitude();
-					altitude = ggaSentence.getAltitude();
-					fixQuality = ggaSentence.getFixQuality();
-				}
-				catch (DataNotAvailableException e) {
-					e.printStackTrace();
-					latitude = null;
-					longitude = null;
-				}
-				
-				this.gnssStatus.setLatitude(position.getLatitude());
-				this.gnssStatus.setLongitude(position.getLongitude());
+				final Position position = handleNmeaData(ggaSentence::getPosition);
+
+				final Double latitude = position.getLatitude();
+				final Double longitude = position.getLongitude();
+				final Double altitude = handleNmeaData(ggaSentence::getAltitude);
+				final GpsFixQuality fixQuality = handleNmeaData(ggaSentence::getFixQuality);
+
+				this.gnssStatus.setLatitude(latitude);
+				this.gnssStatus.setLongitude(longitude);
 				this.gnssStatus.setAltitude(altitude);
 				this.gnssStatus.setFixQuality(fixQuality);
 				break;
 			case GSA:
 				final GSASentence gsaSentence = (GSASentence) sentence;
-				this.gnssStatus.setGpsFixStatus(gsaSentence.getFixStatus());
+				this.gnssStatus.setGpsFixStatus(handleNmeaData(gsaSentence::getFixStatus));
 				break;
 			case GSV:
 				final GSVSentence gsvSentence = (GSVSentence) sentence;
-				GnssProvider gnssProvider = GnssProvider.fromKey(gsvSentence.getTalkerId().name());
-				//LOGGER.info("TALKER ID " + gnssProvider.getName());
+				final GnssProvider gnssProvider = GnssProvider.fromKey(gsvSentence.getTalkerId().name());
 				this.gnssStatus.getSatelliteCount().put(gnssProvider, gsvSentence.getSatelliteCount());
 				break;
 			default:

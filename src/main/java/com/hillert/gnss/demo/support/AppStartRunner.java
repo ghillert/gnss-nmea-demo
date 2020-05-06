@@ -72,13 +72,16 @@ public class AppStartRunner implements ApplicationRunner {
 				System.exit(1);
 			}
 
+			int option = 0;
 			for (RemoteDeviceService remoteDeviceService : discoveredRemoteDeviceService) {
-				System.out.println(
+				System.out.println("Option " + option + " : " +
 					remoteDeviceService.getRemoteDevice().getFriendlyName(false) +
 					" - connection url: " + remoteDeviceService.getConnectionUrl());
+				option++;
 			}
 
-			System.out.println("Which Service do you like to use?");
+			System.out.println("Which Service do you like to use? Please enter a " +
+					"numeric option:");
 
 			try (Scanner in = new Scanner(System.in)) {
 				int selectedOption = in.nextInt();

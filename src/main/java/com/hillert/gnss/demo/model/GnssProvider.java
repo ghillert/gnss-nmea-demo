@@ -29,11 +29,23 @@ import org.springframework.util.Assert;
 public enum GnssProvider {
 
 	/**
-	 * Represents the Serial Port Profile (SPP).
+	 * Represents the Global Positioning System (USA).
 	 */
 	GPS("GP", "GPS"),
+
+	/**
+	 * Represents the GLObal NAvigation Satellite System (Russia).
+	 */
 	GLONASS("GL", "GLONASS"),
+
+	/**
+	 * Represents the global navigation satellite system of the EU.
+	 */
 	GALILEO("GA", "Galileo"),
+
+	/**
+	 * Represents the global navigation satellite system of China.
+	 */
 	BAIDOU("GB", "BeiDou");
 
 	private String id;

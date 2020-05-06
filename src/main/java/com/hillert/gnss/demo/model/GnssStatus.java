@@ -75,6 +75,7 @@ public class GnssStatus {
 		this.latitude = latitude;
 	}
 
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -88,10 +89,9 @@ public class GnssStatus {
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(this.longitude);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + getTotalSatelliteCount();
+		result = prime * result + ((this.satelliteCount == null) ? 0 : this.satelliteCount.hashCode());
 		return result;
 	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -119,7 +119,12 @@ public class GnssStatus {
 		if (Double.doubleToLongBits(this.longitude) != Double.doubleToLongBits(other.longitude)) {
 			return false;
 		}
-		if (getTotalSatelliteCount() != other.getTotalSatelliteCount()) {
+		if (this.satelliteCount == null) {
+			if (other.satelliteCount != null) {
+				return false;
+			}
+		}
+		else if (!this.satelliteCount.equals(other.satelliteCount)) {
 			return false;
 		}
 		return true;
