@@ -18,9 +18,8 @@ package com.hillert.gnss.demo.services;
 
 import java.util.List;
 
-import javax.bluetooth.LocalDevice;
-
-import com.hillert.gnss.demo.model.RemoteDeviceService;
+import com.hillert.gnss.demo.model.RemoteGnssDevice;
+import com.hillert.gnss.demo.support.ConnectionType;
 
 /**
 * Service interface to introspect available Bluetooth devices/services and to
@@ -29,16 +28,15 @@ import com.hillert.gnss.demo.model.RemoteDeviceService;
 * @author Gunnar Hillert
 *
 */
-public interface BluetoothService {
+public interface ConnectorService {
 
-	LocalDevice getLocalDeviceInformation();
+//	LocalDevice getLocalDeviceInformation();
 
-	void discoverBluetoothDevices();
+	List<RemoteGnssDevice> discoverAndGetDevices();
 
 	void subscribeToData(String id);
 
 	void disconnect();
 
-	List<RemoteDeviceService> getDiscoveredBluetoothDeviceServices();
-
+	ConnectionType getType();
 }

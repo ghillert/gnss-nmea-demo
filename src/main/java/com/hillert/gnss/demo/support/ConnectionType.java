@@ -16,33 +16,21 @@
 
 package com.hillert.gnss.demo.support;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
 /**
-* Custom Spring Boot configuration.
-*
-* @author Gunnar Hillert
-*
-*/
-@Component
-@ConfigurationProperties(prefix = "demo.settings")
-public class DemoSettings {
+ *
+ * @author Gunnar Hillert
+ *
+ */
+public enum ConnectionType {
 
-	private ConnectionType type;
-	private String id;
+	/**
+	 *
+	 */
+	SERIAL,
 
-	public ConnectionType getType() {
-		return type;
-	}
-	public void setType(ConnectionType type) {
-		this.type = type;
-	}
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
+	/**
+	 *
+	 */
+	BLUETOOTH;
 
 }

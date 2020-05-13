@@ -6,8 +6,13 @@ This project demonstrates the integration of an external GNSS receiver (Global
 Navigation Satellite System) into a [Java](https://en.wikipedia.org/wiki/Java_(programming_language)) application via the reception and processing
 of NMEA (National Marine Electronics Association) messages.
 
-This demo application *should* work with any Bluetooth-enabled GNSS devices that
+This demo application *should* work with any GNSS devices that
 emit [NMEA messages](https://gpsd.gitlab.io/gpsd/NMEA.html), e.g. devices using the u-blox [ZED-F9P](https://www.u-blox.com/en/product/zed-f9p-module) module. Technical documentation can be found at the [u-blox ZED-F9P Interface Description](https://www.u-blox.com/en/docs/UBX-18010854) guide.
+
+This application allows you to connect to your GNSS device via one of the following options:
+
+- Bluetooth
+- Serial Connection (using USB)
 
 For development and testing, the [Ardusimple simpleRTK2B](https://www.ardusimple.com/simplertk2b/) standalone application board was used.
 
@@ -16,7 +21,7 @@ For development and testing, the [Ardusimple simpleRTK2B](https://www.ardusimple
 * Java 11
 * [Maven](https://maven.apache.org/)
 
-Please make sure that your GNSS-receiver's Bluetooth device is already paired with your
+When using Bluetooth, please make sure that your GNSS-receiver's Bluetooth device is already paired with your
 operating system.
 
 ## Running

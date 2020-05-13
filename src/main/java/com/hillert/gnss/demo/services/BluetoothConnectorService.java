@@ -34,28 +34,32 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import com.hillert.gnss.demo.config.SpringIntegrationConfig.NmeaMessageGateway;
-import com.hillert.gnss.demo.model.RemoteDeviceService;
+import com.hillert.gnss.demo.model.RemoteGnssDevice;
+import com.hillert.gnss.demo.support.ConnectionType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
-* See {@link BluetoothService}.
+* See {@link ConnectorService}.
 *
 * @author Gunnar Hillert
 *
 */
 @Service
-public class DefaultBluetoothService implements BluetoothService {
+@ConditionalOnProperty(name = "demo.settings.type", havingValue = "BLUETOOTH")
+public class BluetoothConnectorService implements ConnectorService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBluetoothService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothConnectorService.class);
 
 	@Autowired
 	private NmeaMessageGateway nmeaMessageGateway;
 
-	private SortedSet<RemoteDeviceService> discoveredRemoteDeviceServices = new ConcurrentSkipListSet<>();
+	private SortedSet<RemoteGnssDevice> discoveredRemoteDeviceServices = new ConcurrentSkipListSet<>();
 
 	/**
 	 * Starts the Bluetooth devices discovery. Close-by devices are printed in
@@ -63,7 +67,7 @@ public class DefaultBluetoothService implements BluetoothService {
 	 *
 	 */
 	@Override
-	public void discoverBluetoothDevices() {
+	public List<RemoteGnssDevice> discoverAndGetDevices() {
 
 		final LocalDevice localDevice = this.getLocalDeviceInformation();
 
@@ -122,12 +126,13 @@ public class DefaultBluetoothService implements BluetoothService {
 			LOGGER.info("The search for Bluetooth services for device {} finished.", deviceName);
 		}
 
-		for (RemoteDeviceService remoteDeviceService : listener.getRemoteDeviceServices()) {
+		for (RemoteGnssDevice remoteDeviceService : listener.getRemoteDeviceServices()) {
 			this.discoveredRemoteDeviceServices.add(remoteDeviceService);
 		}
 
 		LOGGER.info("Finished device discovery.");
 
+		return new ArrayList<RemoteGnssDevice>(this.discoveredRemoteDeviceServices);
 	}
 
 	@Override
@@ -174,8 +179,8 @@ public class DefaultBluetoothService implements BluetoothService {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
-	public LocalDevice getLocalDeviceInformation() {
+	//@Override
+	private LocalDevice getLocalDeviceInformation() {
 		final LocalDevice localDevice;
 		try {
 			localDevice = LocalDevice.getLocalDevice();
@@ -188,7 +193,8 @@ public class DefaultBluetoothService implements BluetoothService {
 	}
 
 	@Override
-	public List<RemoteDeviceService> getDiscoveredBluetoothDeviceServices() {
-		return new ArrayList<RemoteDeviceService>(this.discoveredRemoteDeviceServices);
+	public ConnectionType getType() {
+		return ConnectionType.BLUETOOTH;
 	}
+
 }

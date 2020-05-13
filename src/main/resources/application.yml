@@ -1,3 +1,6 @@
-#demo:
-#  settings:
-#    bluetooth-address: btspp://98D351FDB940:1;authenticate=false;encrypt=false;master=false
+demo:
+  settings:
+     type: bluetooth # 'serial' or 'bluetooth
+#     id: btspp://98D351FDB940:1;authenticate=false;encrypt=false;master=false
+#     id: /dev/tty.usbmodem1422401
+#     id: btspp://98D351FDB940:1;authenticate=false;encrypt=false;master=false

@@ -30,18 +30,18 @@ import net.sf.marineapi.nmea.util.GpsFixStatus;
 */
 public class GnssStatus {
 
-	private double altitude;
-	private double longitude;
-	private double latitude;
+	private Double altitude;
+	private Double longitude;
+	private Double latitude;
 
 	private GpsFixQuality fixQuality;
 	private Map<GnssProvider, Integer> satelliteCount = new ConcurrentHashMap<>();
 	private GpsFixStatus gpsFixStatus;
 
-	public double getAltitude() {
+	public Double getAltitude() {
 		return this.altitude;
 	}
-	public void setAltitude(double altitude) {
+	public void setAltitude(Double altitude) {
 		this.altitude = altitude;
 	}
 	public GpsFixQuality getFixQuality() {
@@ -62,71 +62,64 @@ public class GnssStatus {
 	public void setGpsFixStatus(GpsFixStatus gpsFixStatus) {
 		this.gpsFixStatus = gpsFixStatus;
 	}
-	public double getLongitude() {
+	public Double getLongitude() {
 		return this.longitude;
 	}
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public double getLatitude() {
+	public Double getLatitude() {
 		return this.latitude;
 	}
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(this.altitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((this.fixQuality == null) ? 0 : this.fixQuality.hashCode());
-		result = prime * result + ((this.gpsFixStatus == null) ? 0 : this.gpsFixStatus.hashCode());
-		temp = Double.doubleToLongBits(this.latitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(this.longitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((this.satelliteCount == null) ? 0 : this.satelliteCount.hashCode());
+		result = prime * result + ((altitude == null) ? 0 : altitude.hashCode());
+		result = prime * result + ((fixQuality == null) ? 0 : fixQuality.hashCode());
+		result = prime * result + ((gpsFixStatus == null) ? 0 : gpsFixStatus.hashCode());
+		result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
+		result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
+		result = prime * result + ((satelliteCount == null) ? 0 : satelliteCount.hashCode());
 		return result;
 	}
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (obj == null)
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
 		GnssStatus other = (GnssStatus) obj;
-		if (Double.doubleToLongBits(this.altitude) != Double.doubleToLongBits(other.altitude)) {
-			return false;
-		}
-		if (this.fixQuality != other.fixQuality) {
-			return false;
-		}
-		if (this.gpsFixStatus != other.gpsFixStatus) {
-			return false;
-		}
-		if (Double.doubleToLongBits(this.latitude) != Double.doubleToLongBits(other.latitude)) {
-			return false;
-		}
-		if (Double.doubleToLongBits(this.longitude) != Double.doubleToLongBits(other.longitude)) {
-			return false;
-		}
-		if (this.satelliteCount == null) {
-			if (other.satelliteCount != null) {
+		if (altitude == null) {
+			if (other.altitude != null)
 				return false;
-			}
-		}
-		else if (!this.satelliteCount.equals(other.satelliteCount)) {
+		} else if (!altitude.equals(other.altitude))
 			return false;
-		}
+		if (fixQuality != other.fixQuality)
+			return false;
+		if (gpsFixStatus != other.gpsFixStatus)
+			return false;
+		if (latitude == null) {
+			if (other.latitude != null)
+				return false;
+		} else if (!latitude.equals(other.latitude))
+			return false;
+		if (longitude == null) {
+			if (other.longitude != null)
+				return false;
+		} else if (!longitude.equals(other.longitude))
+			return false;
+		if (satelliteCount == null) {
+			if (other.satelliteCount != null)
+				return false;
+		} else if (!satelliteCount.equals(other.satelliteCount))
+			return false;
 		return true;
 	}
 	@Override

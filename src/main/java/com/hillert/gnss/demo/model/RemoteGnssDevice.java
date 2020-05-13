@@ -16,57 +16,55 @@
 
 package com.hillert.gnss.demo.model;
 
-import javax.bluetooth.RemoteDevice;
-
 import org.springframework.util.Assert;
 
 /**
  * A remote bluetooth device may technically provide multiple services. As such,
- * this class will hold the {@link RemoteDevice} and the corresponding service-specific
+ * this class will hold the {@link RemoteGnssDevice} and the corresponding service-specific
  * connection url.
  *
  * @author Gunnar Hillert
  *
  */
-public class RemoteDeviceService implements Comparable<RemoteDeviceService> {
+public class RemoteGnssDevice implements Comparable<RemoteGnssDevice> {
 
-	private final RemoteDevice remoteDevice;
-	private final String connectionUrl;
+	private final String remoteDeviceLabel;
+	private final String connectionId;
 
-	public RemoteDeviceService(RemoteDevice remoteDevice, String connectionUrl) {
+	public RemoteGnssDevice(String remoteDeviceLabel, String connectionId) {
 		super();
-		Assert.notNull(remoteDevice, "The remoteDevice cannot be null.");
-		Assert.hasText(connectionUrl, "connectionUrl cannot be empty.");
-		this.remoteDevice = remoteDevice;
-		this.connectionUrl = connectionUrl;
+		Assert.hasText(remoteDeviceLabel, "The remoteDeviceLabel cannot be empty.");
+		Assert.hasText(connectionId, "connectionId cannot be empty.");
+		this.remoteDeviceLabel = remoteDeviceLabel;
+		this.connectionId = connectionId;
 	}
 
-	public RemoteDevice getRemoteDevice() {
-		return this.remoteDevice;
+	public String getRemoteDeviceLabel() {
+		return this.remoteDeviceLabel;
 	}
 
 	/**
 	 * REturns the connection Url of the service.
 	 * @return Connection Url of the service. Never null.
 	 */
-	public String getConnectionUrl() {
-		return this.connectionUrl;
+	public String getConnectionId() {
+		return this.connectionId;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("RemoteDeviceService [remoteDevice=");
-		builder.append(this.remoteDevice);
-		builder.append(", connectionUrl=");
-		builder.append(this.connectionUrl);
+		builder.append("RemoteDevice [remoteDeviceLabel=");
+		builder.append(this.remoteDeviceLabel);
+		builder.append(", connectionId=");
+		builder.append(this.connectionId);
 		builder.append("]");
 		return builder.toString();
 	}
 
 	@Override
-	public int compareTo(RemoteDeviceService remoteDeviceService) {
-		return this.getConnectionUrl().compareTo(remoteDeviceService.getConnectionUrl());
+	public int compareTo(RemoteGnssDevice remoteDevice) {
+		return this.remoteDeviceLabel.compareTo(remoteDevice.getRemoteDeviceLabel());
 	}
 
 }
