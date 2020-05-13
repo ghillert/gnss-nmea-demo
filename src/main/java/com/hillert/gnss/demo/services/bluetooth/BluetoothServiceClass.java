@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hillert.gnss.demo.services;
+package com.hillert.gnss.demo.services.bluetooth;
 
 /**
  * Defines Bluetooth Service Classes supported by the application.

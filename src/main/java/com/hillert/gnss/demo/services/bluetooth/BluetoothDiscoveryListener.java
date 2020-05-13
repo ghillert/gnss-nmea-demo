@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hillert.gnss.demo.services;
+package com.hillert.gnss.demo.services.bluetooth;
 
 import java.io.IOException;
 import java.util.Set;
@@ -27,7 +27,7 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
-import com.hillert.gnss.demo.model.RemoteDeviceService;
+import com.hillert.gnss.demo.model.RemoteGnssDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class BluetoothDiscoveryListener implements DiscoveryListener {
 	private CountDownLatch countDownLatch = new CountDownLatch(1);
 
 	private final Set<RemoteDevice> discoveredBluetoothDevices = ConcurrentHashMap.newKeySet();
-	private final Set<RemoteDeviceService> remoteDeviceServices = ConcurrentHashMap.newKeySet();
+	private final Set<RemoteGnssDevice> remoteDeviceServices = ConcurrentHashMap.newKeySet();
 
 	public BluetoothDiscoveryListener() {
 	}
@@ -102,7 +102,13 @@ public class BluetoothDiscoveryListener implements DiscoveryListener {
 			else {
 				LOGGER.info("service found with connectionUrl {}.", connectionUrl);
 			}
-			this.remoteDeviceServices.add(new RemoteDeviceService(services[i].getHostDevice(), connectionUrl));
+			try {
+				this.remoteDeviceServices.add(new RemoteGnssDevice(services[i].getHostDevice().getFriendlyName(false), connectionUrl));
+			}
+			catch (IOException e) {
+				throw new IllegalStateException("The remote device can not be "
+						+ "contacted or the remote device could not provide its name.", e);
+			}
 		}
 	}
 
@@ -142,12 +148,12 @@ public class BluetoothDiscoveryListener implements DiscoveryListener {
 		this.countDownLatch = new CountDownLatch(1);
 	}
 
-	public Set<RemoteDeviceService> getRemoteDeviceServices() {
-		return this.remoteDeviceServices;
-	}
-
 	public Set<RemoteDevice> getDiscoveredBluetoothDevices() {
 		return this.discoveredBluetoothDevices;
+	}
+
+	public Set<RemoteGnssDevice> getRemoteDeviceServices() {
+		return this.remoteDeviceServices;
 	}
 
 }

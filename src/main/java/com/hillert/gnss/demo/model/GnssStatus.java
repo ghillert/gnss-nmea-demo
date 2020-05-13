@@ -30,18 +30,18 @@ import net.sf.marineapi.nmea.util.GpsFixStatus;
 */
 public class GnssStatus {
 
-	private double altitude;
-	private double longitude;
-	private double latitude;
+	private Double altitude;
+	private Double longitude;
+	private Double latitude;
 
 	private GpsFixQuality fixQuality;
 	private Map<GnssProvider, Integer> satelliteCount = new ConcurrentHashMap<>();
 	private GpsFixStatus gpsFixStatus;
 
-	public double getAltitude() {
+	public Double getAltitude() {
 		return this.altitude;
 	}
-	public void setAltitude(double altitude) {
+	public void setAltitude(Double altitude) {
 		this.altitude = altitude;
 	}
 	public GpsFixQuality getFixQuality() {
@@ -62,33 +62,28 @@ public class GnssStatus {
 	public void setGpsFixStatus(GpsFixStatus gpsFixStatus) {
 		this.gpsFixStatus = gpsFixStatus;
 	}
-	public double getLongitude() {
+	public Double getLongitude() {
 		return this.longitude;
 	}
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public double getLatitude() {
+	public Double getLatitude() {
 		return this.latitude;
 	}
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
-
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(this.altitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((this.altitude == null) ? 0 : this.altitude.hashCode());
 		result = prime * result + ((this.fixQuality == null) ? 0 : this.fixQuality.hashCode());
 		result = prime * result + ((this.gpsFixStatus == null) ? 0 : this.gpsFixStatus.hashCode());
-		temp = Double.doubleToLongBits(this.latitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(this.longitude);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((this.latitude == null) ? 0 : this.latitude.hashCode());
+		result = prime * result + ((this.longitude == null) ? 0 : this.longitude.hashCode());
 		result = prime * result + ((this.satelliteCount == null) ? 0 : this.satelliteCount.hashCode());
 		return result;
 	}
@@ -104,7 +99,12 @@ public class GnssStatus {
 			return false;
 		}
 		GnssStatus other = (GnssStatus) obj;
-		if (Double.doubleToLongBits(this.altitude) != Double.doubleToLongBits(other.altitude)) {
+		if (this.altitude == null) {
+			if (other.altitude != null) {
+				return false;
+			}
+		}
+		else if (!this.altitude.equals(other.altitude)) {
 			return false;
 		}
 		if (this.fixQuality != other.fixQuality) {
@@ -113,10 +113,20 @@ public class GnssStatus {
 		if (this.gpsFixStatus != other.gpsFixStatus) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.latitude) != Double.doubleToLongBits(other.latitude)) {
+		if (this.latitude == null) {
+			if (other.latitude != null) {
+				return false;
+			}
+		}
+		else if (!this.latitude.equals(other.latitude)) {
 			return false;
 		}
-		if (Double.doubleToLongBits(this.longitude) != Double.doubleToLongBits(other.longitude)) {
+		if (this.longitude == null) {
+			if (other.longitude != null) {
+				return false;
+			}
+		}
+		else if (!this.longitude.equals(other.longitude)) {
 			return false;
 		}
 		if (this.satelliteCount == null) {

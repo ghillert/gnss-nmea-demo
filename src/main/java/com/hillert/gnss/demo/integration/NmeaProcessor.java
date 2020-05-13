@@ -87,7 +87,7 @@ public class NmeaProcessor {
 	 * @param message The NMEA to process, only GGA, GSA, GSV - other messages will be ignored
 	 */
 	public void process(String message) {
-
+//System.out.println(message);
 		final SentenceFactory sf = SentenceFactory.getInstance();
 		final Sentence sentence = (Sentence) sf.createParser(message);
 
@@ -97,11 +97,15 @@ public class NmeaProcessor {
 				final GGASentence ggaSentence = (GGASentence) sentence;
 				final Position position = handleNmeaData(ggaSentence::getPosition);
 
+				final Double latitude;
+				final Double longitude;
 				if (position != null) {
-					final Double latitude = position.getLatitude();
-					final Double longitude = position.getLongitude();
-					this.gnssStatus.setLatitude(latitude);
-					this.gnssStatus.setLongitude(longitude);
+					latitude = position.getLatitude();
+					longitude = position.getLongitude();
+				}
+				else {
+					latitude = null;
+					longitude = null;
 				}
 
 				final Double altitude = handleNmeaData(ggaSentence::getAltitude);

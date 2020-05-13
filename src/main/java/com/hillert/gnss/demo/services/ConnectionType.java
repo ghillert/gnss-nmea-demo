@@ -16,29 +16,22 @@
 
 package com.hillert.gnss.demo.services;
 
-import java.util.List;
-
-import javax.bluetooth.LocalDevice;
-
-import com.hillert.gnss.demo.model.RemoteDeviceService;
-
 /**
-* Service interface to introspect available Bluetooth devices/services and to
-* subscribe to them.
-*
-* @author Gunnar Hillert
-*
-*/
-public interface BluetoothService {
+ * Enumeration to identify the types of connections this application supports.
+ *
+ * @author Gunnar Hillert
+ *
+ */
+public enum ConnectionType {
 
-	LocalDevice getLocalDeviceInformation();
+	/**
+	 * Identifies serial (e.g. USB) connections.
+	 */
+	SERIAL,
 
-	void discoverBluetoothDevices();
-
-	void subscribeToData(String id);
-
-	void disconnect();
-
-	List<RemoteDeviceService> getDiscoveredBluetoothDeviceServices();
+	/**
+	 * Identifies Bluetooth connections.
+	 */
+	BLUETOOTH;
 
 }

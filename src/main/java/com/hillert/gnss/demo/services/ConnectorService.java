@@ -14,36 +14,28 @@
  * limitations under the License.
  */
 
-package com.hillert.gnss.demo.support;
+package com.hillert.gnss.demo.services;
 
-import com.hillert.gnss.demo.services.ConnectionType;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import java.util.List;
+
+import com.hillert.gnss.demo.model.RemoteGnssDevice;
 
 /**
-* Custom Spring Boot configuration.
+* Service interface to introspect available Bluetooth devices/services and to
+* subscribe to them.
 *
 * @author Gunnar Hillert
 *
 */
-@Component
-@ConfigurationProperties(prefix = "demo.settings")
-public class DemoSettings {
+public interface ConnectorService {
 
-	private ConnectionType type;
-	private String id;
+//	LocalDevice getLocalDeviceInformation();
 
-	public ConnectionType getType() {
-		return this.type;
-	}
-	public void setType(ConnectionType type) {
-		this.type = type;
-	}
-	public String getId() {
-		return this.id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
+	List<RemoteGnssDevice> discoverAndGetDevices();
 
+	void subscribeToData(String id);
+
+	void disconnect();
+
+	ConnectionType getType();
 }
