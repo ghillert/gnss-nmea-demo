@@ -1,6 +1,9 @@
 demo:
   settings:
-     type: bluetooth # 'serial' or 'bluetooth
-#     id: btspp://98D351FDB940:1;authenticate=false;encrypt=false;master=false
-#     id: /dev/tty.usbmodem1422401
+     #type: bluetooth # 'serial' or 'bluetooth
+     id: btspp://98D351FDB940:1;authenticate=false;encrypt=false;master=false
+     #type: serial # 'serial' or 'bluetooth
+     #id:/dev/tty.usbserial-D307CJNV
+     #id: /dev/tty.usbmodem1422201
+     type: bluetooth
 

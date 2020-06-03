@@ -16,30 +16,28 @@
 
 package com.hillert.gnss.demo.services.serial;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.hillert.gnss.demo.config.SpringIntegrationConfig.NmeaMessageGateway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
+
 import com.hillert.gnss.demo.model.RemoteGnssDevice;
+import com.hillert.gnss.demo.services.AbstractConnectorService;
 import com.hillert.gnss.demo.services.ConnectionType;
 import com.hillert.gnss.demo.services.ConnectorService;
+
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.UnsupportedCommOperationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 /**
 * Implementation of the {@link ConnectorService} for serial connections (e.g. via USB).
@@ -49,12 +47,9 @@ import org.springframework.util.StringUtils;
 */
 @Service
 @ConditionalOnProperty(name = "demo.settings.type", havingValue = "SERIAL")
-public class SerialConnectorService implements ConnectorService {
+public class SerialConnectorService extends AbstractConnectorService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SerialConnectorService.class);
-
-	@Autowired
-	private NmeaMessageGateway nmeaMessageGateway;
 
 	/**
 	 * Starts the discovery for available serial devices.
@@ -102,29 +97,12 @@ public class SerialConnectorService implements ConnectorService {
 
 		LOGGER.info("Opened serial port: " + serialPortId);
 
-		final InputStream is;
-
-		try {
-			is = commPort.getInputStream();
+		try (final InputStream is = commPort.getInputStream()) {
+			super.extractMessages(is);
 		}
 		catch (IOException e) {
 			throw new IllegalStateException("Unable to get the input stream from the serial port.", e);
 		}
-
-		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
-
-		while (true) {
-			try {
-				final String lineRead = bufferedReader.readLine();
-				if (StringUtils.hasText(lineRead) && lineRead.startsWith("$")) {
-					this.nmeaMessageGateway.send(lineRead);
-				}
-			}
-			catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
-
 	}
 
 	@Override

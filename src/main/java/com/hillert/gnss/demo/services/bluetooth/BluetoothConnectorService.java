@@ -16,10 +16,8 @@
 
 package com.hillert.gnss.demo.services.bluetooth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -33,16 +31,15 @@ import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
-import com.hillert.gnss.demo.config.SpringIntegrationConfig.NmeaMessageGateway;
-import com.hillert.gnss.demo.model.RemoteGnssDevice;
-import com.hillert.gnss.demo.services.ConnectionType;
-import com.hillert.gnss.demo.services.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+
+import com.hillert.gnss.demo.model.RemoteGnssDevice;
+import com.hillert.gnss.demo.services.AbstractConnectorService;
+import com.hillert.gnss.demo.services.ConnectionType;
+import com.hillert.gnss.demo.services.ConnectorService;
 
 /**
 * See {@link ConnectorService}.
@@ -52,14 +49,13 @@ import org.springframework.util.StringUtils;
 */
 @Service
 @ConditionalOnProperty(name = "demo.settings.type", havingValue = "BLUETOOTH")
-public class BluetoothConnectorService implements ConnectorService {
+public class BluetoothConnectorService extends AbstractConnectorService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothConnectorService.class);
 
-	@Autowired
-	private NmeaMessageGateway nmeaMessageGateway;
-
 	private SortedSet<RemoteGnssDevice> discoveredRemoteDeviceServices = new ConcurrentSkipListSet<>();
+
+	private StreamConnection streamConnection;
 
 	/**
 	 * Starts the Bluetooth devices discovery. Close-by devices are printed in
@@ -137,49 +133,42 @@ public class BluetoothConnectorService implements ConnectorService {
 
 	@Override
 	public void subscribeToData(String address) {
-		final StreamConnection connection;
+
 		try {
-			connection = (StreamConnection)  Connector.open(address);
+			this.streamConnection = (StreamConnection) Connector.open(address);
+
+			try (
+				final InputStream is = streamConnection.openInputStream();
+				) {
+				super.extractMessages(is);
+			}
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException("Unable to open Bluetooth coonnection to address:" + address, e);
 		}
-
-		if (connection == null) {
-			System.err.println("Could not open connection to address: " + address);
-			System.exit(1);
-		}
-
-		final InputStream is;
-		try {
-			is = connection.openInputStream();
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-
-		final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is));
-
-		while (true) {
-			try {
-				final String lineRead = bufferedReader.readLine();
-				if (StringUtils.hasText(lineRead) && lineRead.startsWith("$")) {
-					this.nmeaMessageGateway.send(lineRead);
+		finally {
+			if (this.streamConnection != null) {
+				try {
+					this.streamConnection.close();
+				}
+				catch (IOException e) {
+					throw new IllegalStateException(e);
 				}
 			}
-			catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
 		}
-
 	}
 
 	@Override
 	public void disconnect() {
-		// TODO Auto-generated method stub
+		if (this.streamConnection != null) {
+			try {
+				this.streamConnection.close();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
 	}
 
-	//@Override
 	private LocalDevice getLocalDeviceInformation() {
 		final LocalDevice localDevice;
 		try {
@@ -196,5 +185,4 @@ public class BluetoothConnectorService implements ConnectorService {
 	public ConnectionType getType() {
 		return ConnectionType.BLUETOOTH;
 	}
-
 }
