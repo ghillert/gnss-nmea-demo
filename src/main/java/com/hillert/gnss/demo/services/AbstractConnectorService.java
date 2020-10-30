@@ -47,6 +47,16 @@ public abstract class AbstractConnectorService implements ConnectorService {
 	private NmeaMessageGateway nmeaMessageGateway;
 
 	public void extractMessages(InputStream is) {
+
+//		while(!Thread.interrupted()) {
+//						try {
+////							Thread.sleep(1000);
+////							System.out.println("Running, press CTRL-C to stop..");
+//						} catch (InterruptedException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//		}
 		try (
 			final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(is, CharacterSet.ISO_8859_1.toCharset()))
 			) {
@@ -68,7 +78,9 @@ public abstract class AbstractConnectorService implements ConnectorService {
 
 				try {
 					final String lineRead = bufferedReader.readLine();
-					System.out.println(lineRead);
+//					if (lineRead.matches("^...GSV.*")) {
+//						System.out.println(lineRead);
+//					}
 					if (StringUtils.hasText(lineRead) && lineRead.startsWith("$")) {
 						this.nmeaMessageGateway.send(lineRead);
 					}

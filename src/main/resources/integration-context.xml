@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-webflux="http://www.springframework.org/schema/integration/webflux"
+	xmlns:int-stream="http://www.springframework.org/schema/integration/stream"
+	xsi:schemaLocation="
+	 http://www.springframework.org/schema/beans
+	 https://www.springframework.org/schema/beans/spring-beans.xsd
+	 http://www.springframework.org/schema/integration
+	 https://www.springframework.org/schema/integration/spring-integration.xsd
+	 http://www.springframework.org/schema/integration/webflux
+	 https://www.springframework.org/schema/integration/webflux/spring-integration-webflux.xsd
+	 http://www.springframework.org/schema/integration/stream
+	 https://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
+
+	<int:control-bus input-channel="operationChannel"/>
+	<int:poller id="globalPoller" default="true" fixed-rate="1000"/>
+	<int:channel id="rawNmeaInput"/>
+
+	<int:transformer id="rawNmeaToSentenceTransformer"
+		input-channel="rawNmeaInput" output-channel="sentenceChannel">
+		<bean class="com.hillert.gnss.demo.integration.RawNmeaToSentenceTransformer"/>
+	</int:transformer>
+
+	<int:channel id="sentenceChannel">
+<!-- 	<int:interceptors>
+			<int:wire-tap channel="logger"/>
+		</int:interceptors> -->
+	</int:channel>
+
+	<int:logging-channel-adapter id="logger" level="INFO" log-full-message="false"/>
+
+	<int:header-value-router header-name="sentenceId" input-channel="sentenceChannel" resolution-required="false" default-output-channel="nullChannel" >
+		<int:mapping value="UBX" channel="ubxChannel"/>
+		<int:mapping value="GGA" channel="ggaChannel"/>
+		<int:mapping value="GSA" channel="gsaChannel"/>
+		<int:mapping value="GSV" channel="gsvChannel"/>
+	</int:header-value-router>
+
+	<int:channel id="ubxChannel"><int:queue /></int:channel>
+	<int:channel id="ggaChannel"><int:queue /></int:channel>
+	<int:channel id="gsaChannel"><int:queue /></int:channel>
+	<int:channel id="gsvChannel"><int:queue /></int:channel>
+
+	<int:header-enricher input-channel="gsvChannel" output-channel="gsvChannelAggregate">
+		<int:correlation-id expression="payload.getTalkerId() + '_' + payload.getSentenceCount()"/>
+		<int:header name="talkerId" expression="payload.getTalkerId()"/>
+		<int:header name="sentenceIndex" expression="payload.getSentenceIndex()"/>
+		<int:header name="numberOfSentences" expression="payload.getSentenceCount()"/>
+	</int:header-enricher>
+
+ 	<int:aggregator id="gsvAggregator" input-channel="gsvChannelAggregate"
+		release-strategy-expression="size() == messages[0].headers.numberOfSentences"
+		correlation-strategy-expression="headers.correlationId" output-channel="destination"
+		expire-groups-upon-completion="true"/>
+
+	<int:channel id="destination">
+		<int:queue/>
+	</int:channel>
+
+	<int:service-activator input-channel="ggaChannel" ref="ggaService"/>
+	<int:service-activator input-channel="destination" ref="gsvService"/>
+	<int:service-activator input-channel="gsaChannel" ref="gsaService"/>
+	<int:service-activator input-channel="ubxChannel" ref="ubxService"/>
+
+	<int:management default-logging-enabled="true"
+		default-counts-enabled="true"
+	/>
+</beans>

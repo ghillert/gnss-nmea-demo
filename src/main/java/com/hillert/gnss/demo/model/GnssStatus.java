@@ -30,13 +30,17 @@ import net.sf.marineapi.nmea.util.GpsFixStatus;
 */
 public class GnssStatus {
 
-	private Double altitude;
-	private Double longitude;
-	private Double latitude;
+	private volatile Double altitude;
+	private volatile Double longitude;
+	private volatile Double latitude;
 
-	private GpsFixQuality fixQuality;
-	private Map<GnssProvider, Integer> satelliteCount = new ConcurrentHashMap<>();
-	private GpsFixStatus gpsFixStatus;
+	private volatile GpsFixQuality fixQuality;
+	private volatile Map<GnssProvider, Integer> satelliteCount = new ConcurrentHashMap<>();
+	private volatile GpsFixStatus gpsFixStatus;
+
+	private volatile Double calculatedHorizontalAccuracyInMeters;
+	private volatile Double ubloxHorizontalAccuracyInMeters;
+	private volatile Double ubloxVerticalAccuracyInMeters;
 
 	public Double getAltitude() {
 		return this.altitude;
@@ -75,6 +79,24 @@ public class GnssStatus {
 		this.latitude = latitude;
 	}
 
+	public Double getCalculatedHorizontalAccuracyInMeters() {
+		return calculatedHorizontalAccuracyInMeters;
+	}
+	public void setCalculatedHorizontalAccuracyInMeters(Double calculatedHorizontalAccuracyInMeters) {
+		this.calculatedHorizontalAccuracyInMeters = calculatedHorizontalAccuracyInMeters;
+	}
+	public Double getUbloxHorizontalAccuracyInMeters() {
+		return ubloxHorizontalAccuracyInMeters;
+	}
+	public void setUbloxHorizontalAccuracyInMeters(Double ubloxHorizontalAccuracyInMeters) {
+		this.ubloxHorizontalAccuracyInMeters = ubloxHorizontalAccuracyInMeters;
+	}
+	public Double getUbloxVerticalAccuracyInMeters() {
+		return ubloxVerticalAccuracyInMeters;
+	}
+	public void setUbloxVerticalAccuracyInMeters(Double ubloxVerticalAccuracyInMeters) {
+		this.ubloxVerticalAccuracyInMeters = ubloxVerticalAccuracyInMeters;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

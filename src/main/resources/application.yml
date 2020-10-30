@@ -1,3 +1,18 @@
+debug: false
+server:
+  port: 8090
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+management.metrics.export:
+  prometheus:
+    enabled: true
+  humio:
+    enabled: false
+    step: 10s
+    api-token:
 demo:
   settings:
      #type: bluetooth # 'serial' or 'bluetooth
@@ -5,5 +20,8 @@ demo:
      #type: serial # 'serial' or 'bluetooth
      #id:/dev/tty.usbserial-D307CJNV
      #id: /dev/tty.usbmodem1422201
+     #type: bluetooth
      type: bluetooth
-
+logging:
+  level:
+    org.springframework.integration: info

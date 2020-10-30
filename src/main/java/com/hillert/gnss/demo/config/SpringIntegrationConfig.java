@@ -16,13 +16,19 @@
 
 package com.hillert.gnss.demo.config;
 
-import com.hillert.gnss.demo.integration.NmeaProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.integration.annotation.MessagingGateway;
-import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.channel.DirectChannel;
-import org.springframework.messaging.MessageChannel;
+import org.springframework.integration.config.EnableIntegration;
+import org.springframework.integration.http.config.EnableIntegrationGraphController;
+
+import com.hillert.gnss.demo.integration.GgaService;
+import com.hillert.gnss.demo.integration.GsaService;
+import com.hillert.gnss.demo.integration.GsvService;
+import com.hillert.gnss.demo.integration.UbxService;
+import com.hillert.gnss.demo.store.GnssStatusStore;
+import com.hillert.gnss.demo.store.SatelliteStore;
 
 /**
  * Spring Integration specific configuration.
@@ -30,23 +36,34 @@ import org.springframework.messaging.MessageChannel;
  * @author Gunnar Hillert
  *
  */
-@Configuration
+@Configuration()
+@EnableIntegration
+@ImportResource(locations = {"classpath:integration-context.xml"})
+@EnableIntegrationGraphController
 public class SpringIntegrationConfig {
 
-	@Bean
-	MessageChannel NmeaMessageChannel() {
-		return new DirectChannel();
-	}
-
-	@Bean
-	@ServiceActivator(inputChannel = "nmeaMessageChannel")
-	public NmeaProcessor nmeaMessageHandler() {
-		return new NmeaProcessor();
-	}
-
-	@MessagingGateway(defaultRequestChannel = "nmeaMessageChannel")
+	@MessagingGateway(defaultRequestChannel = "rawNmeaInput")
 	public interface NmeaMessageGateway {
 		void send(String data);
 	}
 
+	@Bean
+	public GsvService gsvService(SatelliteStore satelliteStore, GnssStatusStore gnssStatusStore) {
+		return new GsvService(satelliteStore, gnssStatusStore);
+	}
+
+	@Bean
+	public GsaService gsaService(GnssStatusStore gnssStatusStore) {
+		return new GsaService(gnssStatusStore);
+	}
+
+	@Bean
+	public GgaService ggaService(GnssStatusStore gnssStatusStore) {
+		return new GgaService(gnssStatusStore);
+	}
+
+	@Bean
+	public UbxService ubxService(GnssStatusStore gnssStatusStore) {
+		return new UbxService(gnssStatusStore);
+	}
 }

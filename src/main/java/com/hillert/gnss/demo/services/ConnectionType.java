@@ -32,6 +32,10 @@ public enum ConnectionType {
 	/**
 	 * Identifies Bluetooth connections.
 	 */
-	BLUETOOTH;
+	BLUETOOTH,
 
+	/**
+	 * Identifies Bluetooth connections.
+	 */
+	DUMMY;
 }

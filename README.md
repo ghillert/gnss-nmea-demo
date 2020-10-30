@@ -16,12 +16,25 @@ This application allows you to connect to your GNSS device via one of the follow
 
 For development and testing, the [Ardusimple simpleRTK2B](https://www.ardusimple.com/simplertk2b/) standalone application board was used.
 
+Furthermore, we use [Grafana](https://grafana.com/) to visualize some aspects of the data.
+As such, we use [Micrometer](http://micrometer.io/) to collect GNSS data as metrics
+and provide the data to [Prometheus](https://prometheus.io/), a monitoring system and time series database. Grafana will then be used as a dashboarding tool.
+
 ## Requirements
 
 * Java 11
 * [Maven](https://maven.apache.org/)
 
 When using Bluetooth, please make sure that your GNSS-receiver's Bluetooth device is already paired with your operating system.
+
+* Docker to run:
+  - Grafana
+  - Prometheus
+
+In order to setup Grafana and Prometheus, we will use a docker-compose stack from https://github.com/vegasbrianc/prometheus.
+
+Grafana Dashboard: http://localhost:3000/
+Prometheus Dashboard: http://localhost:9090/graph
 
 ## Running
 

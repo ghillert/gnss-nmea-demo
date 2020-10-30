@@ -23,7 +23,22 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+ 		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+<!-- 		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-humio</artifactId>
+		</dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -45,6 +60,10 @@
 			<artifactId>spring-integration-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-http</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
@@ -56,7 +75,7 @@
 		<dependency>
 			<groupId>net.sf.marineapi</groupId>
 			<artifactId>marineapi</artifactId>
-			<version>0.11.0</version>
+			<version>0.12.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.neuronrobotics</groupId>
@@ -69,14 +88,14 @@
 			<version>1.16.1</version>
 		</dependency>
 		<dependency>
-				<groupId>org.geotools</groupId>
-				<artifactId>gt-referencing</artifactId>
-				<version>23.0</version>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-referencing</artifactId>
+			<version>23.0</version>
 		</dependency>
 		<dependency>
-				<groupId>org.geotools</groupId>
-				<artifactId>gt-main</artifactId>
-				<version>23.0</version>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-main</artifactId>
+			<version>23.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
